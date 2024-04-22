@@ -45,11 +45,11 @@ void merge(int arr[], int left, int mid, int right) {
 void mergeSort(int arr[], int left, int right) {
     int mid;
     if(left<right) {
-        mid  = left + (right-left)/2;
-        #pragma omp parallel sections 
+     mid  = left + (right-left)/2;
+      #pragma omp parallel sections 
         {
             #pragma omp section 
-            {
+            { 
                 mergeSort(arr, left,  mid);
             }
             #pragma omp section 
@@ -61,19 +61,64 @@ void mergeSort(int arr[], int left, int right) {
     }
 }
 
+// int main() {
+//     int arr[] = {6,5,3,1,8,7,2,4};
+//     int n = sizeof(arr)/sizeof(arr[0]);
+
+//     #pragma omp parallel 
+//     {
+//         #pragma omp single 
+//         {
+//             mergeSort(arr, 0, n-1);
+//         }
+//     }
+
+//     for(int i = 0; i < n; i++) {
+//         cout<<arr[i]<<" ";
+//     }
+
+// }
+
+
+
 int main() {
-    int arr[] = {6,5,3,1,8,7,2,4};
-    int n = sizeof(arr)/sizeof(arr[0]);
+    int *a, n, i;
+    double start_time, end_time, seq_time, par_time;
 
-    #pragma omp parallel {
-        #pragma omp single {
-            mergeSort(arr, 0, n-1);
-        }
-    }
+    cout<<"Enter total no. of elements: "<<endl;
+    cin>>n;
+    a = new int[n];
 
+    cout<<"\nEnter elements: "<<endl;
+    for(i=0; i<n; i++) 
     {
-        for(int i = 0; i < n; i++) {
-            cout<<arr[i]<<" "
+        cin>>a[i];
+    }
+
+    start_time = omp_get_wtime();
+    mergeSort(a,0,n-1);
+    end_time = omp_get_wtime();
+    seq_time = end_time - start_time;
+    cout<<"\nSequential Time: "<<seq_time<<endl;
+
+    start_time = omp_get_wtime();
+    #pragma omp parallel 
+    {
+        #pragma omp single
+        {
+            mergeSort(a, 0, n-1);
         }
     }
+    end_time = omp_get_wtime();
+    par_time = end_time - start_time;
+
+    cout<<"\nParallel Time: "<<par_time<<endl;
+
+    cout<<"\nSorted Array: "<<endl;
+    for(i=0; i<n; i++)
+    {
+        cout<<a[i]<<endl;
+    }
+
+    return 0;
 }

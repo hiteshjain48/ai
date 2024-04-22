@@ -32,33 +32,35 @@ void bfs(int start)
 		}
 	}
 }
-void bfs1 (int start) {
-    vector<bool> visited(adj.size(), false);
-    vector<int> q;
+void bfs1(int start) {
+   vector<bool> visited(adj.size(), false);
+   vector<int>q;
+   q.push_back(start);
+   visited[start] = true;
 
-    q.push_back(start);
-    visited[start] = true;
-
-    int curr;
+    int visit;
     while(!q.empty()) {
-        curr = q[0];
-        cout<<curr<<' ';
+        visit = q[0];
+        cout<<visit<<" ";
         q.erase(q.begin());
-
-        for(int i=0; i<adj[curr].size(); i++){
-            if(adj[curr][i]==1 && visited[curr]==false){
-                q.push_back(curr);
-                visited[curr] = true;
+        #pragma omp parallel for
+        for(int i = 0; i<adj[visit].size(); i++){
+            if(adj[visit][i]==1 && visited[i]==false) {
+                #pragma omp critical
+                {
+                    q.push_back(i);
+                    visited[i] = true;
+                }
             }
         }
     }
 }
 int main()
 {
-int v = 5;
-adj= vector<vector<int>>(v,vector<int>(v,0));
-addEdge(0,1);
-addEdge(0,2);
-addEdge(1,3);
-bfs(0);
+    int v = 5;
+    adj= vector<vector<int>>(v,vector<int>(v,0));
+    addEdge(0,1);
+    addEdge(0,2);
+    addEdge(1,3);
+    bfs1(0);
 }

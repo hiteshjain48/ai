@@ -53,10 +53,10 @@ int main()
     }
 
    // Sequential algorithm
-    auto start = high_resolution_clock::now();
+    double start = omp_get_wtime();
     sequentialBubbleSort(a, n);
-    auto stop = high_resolution_clock::now(); 
-    auto seq_time = duration_cast<microseconds>(stop - start); 
+    double stop = omp_get_wtime(); 
+    double seq_time = stop-start; 
 
     
 
@@ -66,12 +66,12 @@ int main()
         cout << a[i] << endl;
     }
 
-    cout << "\nSequential Time: " << seq_time.count() << endl;
+    cout << "\nSequential Time: " << seq_time<< endl;
 
-   auto start_time =  high_resolution_clock::now();
+    start = omp_get_wtime();
     parallelBubbleSort(a, n);
-    auto end_time = high_resolution_clock::now(); 
-    auto par_time = duration_cast<microseconds>(end_time - start_time); 
+    stop = omp_get_wtime();
+    double par_time = stop - start; 
     
     cout << "\n sorted array is=>";
     for (int i = 0; i < n; i++)
@@ -79,7 +79,7 @@ int main()
         cout << a[i] << endl;
     }
 
-    cout << "\nParallel Time: " << par_time.count()<< endl;
+    cout << "\nParallel Time: " << par_time<< endl;
     delete[] a; // Don't forget to free the allocated memory
 
     return 0;
