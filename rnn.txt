@@ -1,0 +1,55 @@
+import pandas as pd
+import numpy as np
+import seaborn as sns
+
+stocks = pd.read_csv('Google_Stock_Price_Train.csv')
+stocks['Volume'] = stocks['Volume'].str.replace(",","").astype(float)
+stocks['Close'] = stocks['Close'].str.replace(",","").astype(float)
+from sklearn.preprocessing import MinMaxScaler
+
+scaler = MinMaxScaler()
+stocks_without_date = stocks[['Open', 'High','Low','Close','Volume']]
+stocks_scaled = pd.DataFrame(scaler.fit_transform(stocks_without_date))
+
+sns.heatmap(stocks_scaled.corr())
+
+stocks_scaled = stocks_scaled.drop([1,2,4], axis=1)
+
+def split_data(sequence, n_past, n_future):
+    x,y = [], []
+    for window_start in range(len(sequence)):
+        past_end = window_start + n_past
+        future_end = past_end + n_future
+        if (future_end>len(sequence)):
+            break
+        past = sequence[window_start:past_end,:]
+        future = sequence[past_end:future_end, -1]
+        x.append(past)
+        y.append(future)
+    return np.array(x), np.array(y)
+
+X,y = split_data(stocks_scaled.to_numpy(), 60, 1)
+
+X.shape, y.shape
+
+from sklearn.model_selection import train_test_split
+X_train, X_test, y_train, y_test = train_test_split(X,y,test_size=0.2, random_state=42)
+from tensorflow import keras
+
+model = keras.Sequential([
+    keras.layers.LSTM(612, input_shape=(60,2)),
+    keras.layers.Dense(50, activation='relu'),
+    keras.layers.Dense(50, activation='relu'),
+    keras.layers.Dense(30, activation='relu'),
+    keras.layers.Dense(1)
+])
+
+
+model.compile(loss='mse', optimizer='adam',metrics=['mae'])
+model.fit(X_train, y_train, epochs=250, batch_size=32, verbose=2)
+predicted_values = model.predict(X_test)
+
+from sklearn.metrics import r2_score
+
+r2 = r2_score(y_test, predicted_values)
+print(r2)
